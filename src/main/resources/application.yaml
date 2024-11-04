@@ -1,0 +1,31 @@
+# Caffeine Configuration
+spring:
+  cache:
+    caffeine:
+      spec: maximumSize=1000000,expireAfterAccess=600s
+    cache-names:
+      - buckets
+
+bucket4j:
+  enabled: true
+  debug : true
+  cache:
+    type: caffeine
+    cache-name: buckets
+  filters:
+    - cache-name: buckets
+      url: /first(/|\?)?.*
+      rate-limits:
+        - expression: "@securityService.getClientIP(#this)"
+          bandwidths:
+            - capacity: 1
+              time: 5
+              unit: seconds
+    - cache-name: buckets
+      url: /second(/|\?)?.*
+      rate-limits:
+        - expression: "@securityService.getClientIP(#this)"
+          bandwidths:
+            - capacity: 2
+              time: 5
+              unit: seconds
